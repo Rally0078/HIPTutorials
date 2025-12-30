@@ -1,0 +1,9 @@
+cmake-build-debug-visual-studio/
+cmake-build-debug/
+*.exe
+*.pdb
+*.lib
+*.o
+*.so
+*.xml
+*.iml
