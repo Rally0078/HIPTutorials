@@ -48,7 +48,6 @@ int main() {
     }
     hip_tutorials::check_hip(hipDeviceSynchronize());
     hip_tutorials::check_hip(hipMemcpy(c.data(), d_c, bytes, hipMemcpyDeviceToHost));
-    hip_tutorials::check_hip(hipDeviceSynchronize());
     std::cout << "Kernel launched from .cpp file!" << std::endl;
     std::cout << "Value c[10] = " << c[10] <<" = " << a[10] << " + " << b[10] << std::endl;
     std::cin.get();
