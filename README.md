@@ -47,11 +47,12 @@ cmake --build build_cuda --config Release
 cmake -B build_hip -S . -G "Ninja" `
   -DGPU_BACKEND=HIP `
   -DCMAKE_HIP_ARCHITECTURES="gfx1201" `
-  -DCMAKE_C_COMPILER="C:/Program Files/AMD/ROCm/6.4/bin/clang.exe" `
-  -DCMAKE_CXX_COMPILER="C:/Program Files/AMD/ROCm/6.4/bin/clang++.exe" `
-  -DCMAKE_HIP_COMPILER="C:/Program Files/AMD/ROCm/6.4/bin/clang++.exe" `
+  -DCMAKE_C_COMPILER="C:/Program Files/AMD/ROCm/7.1/bin/clang.exe" `
+  -DCMAKE_CXX_COMPILER="C:/Program Files/AMD/ROCm/7.1/bin/clang++.exe" `
+  -DCMAKE_HIP_COMPILER="C:/Program Files/AMD/ROCm/7.1/bin/clang++.exe" `
   -DCMAKE_NINJA_FORCE_RESPONSE_FILE=ON `
-  -DCMAKE_CXX_SCAN_FOR_MODULES=OFF
+  -DCMAKE_CXX_SCAN_FOR_MODULES=OFF `
+  -DCMAKE_PREFIX_PATH="C:/Program Files/AMD/ROCm/7.1"
 
 # 2. Build the project executables
 cmake --build build_hip

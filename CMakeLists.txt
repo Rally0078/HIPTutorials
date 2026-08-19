@@ -13,7 +13,7 @@ file(GLOB_RECURSE KERNEL_SOURCES "kernels/*.cu")
 
 if(GPU_BACKEND STREQUAL "CUDA")
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-        set(CMAKE_CUDA_ARCHITECTURES "86")
+        set(CMAKE_CUDA_ARCHITECTURES "86")  # Default to my GPU (RTX 3050 Laptop)
     endif()
 
     enable_language(CUDA)
@@ -37,11 +37,7 @@ if(GPU_BACKEND STREQUAL "CUDA")
 
 elseif(GPU_BACKEND STREQUAL "HIP")
     if(NOT DEFINED CMAKE_HIP_ARCHITECTURES)
-        set(CMAKE_HIP_ARCHITECTURES "gfx1201")
-    endif()
-    if(WIN32)
-        set(ROCM_PATH "C:/Program Files/AMD/ROCm/6.4" CACHE PATH "Path to ROCm root")
-        list(APPEND CMAKE_PREFIX_PATH "${ROCM_PATH}")
+        set(CMAKE_HIP_ARCHITECTURES "gfx1201")  # Default to my GPU (RX 9070 XT)
     endif()
 
     enable_language(HIP)
