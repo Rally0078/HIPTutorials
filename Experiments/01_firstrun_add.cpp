@@ -1,11 +1,10 @@
-#include <hip/hip_runtime_api.h> // Use _api.h for standard C++ files
+#include <utils/kernels.hpp>
 #include <iostream>
 #include <vector>
 #include <functional>
 #include <numeric>
 #include <random>
 #include <algorithm>
-#include <utils/kernels.hpp>
 #include <utils/ops.hpp>
 
 void randomize_vectors(std::vector<float>& vec, float min, float max, unsigned int seed) {
@@ -20,39 +19,49 @@ int main() {
     constexpr long n = 500'000'000;
     constexpr size_t bytes = n * sizeof(float);
     int device;
-    hip_tutorials::check_hip(hipGetDevice(&device));
+    cuda_tutorials::check_cuda(cudaGetDevice(&device));
 
-    hipDeviceProp_t props;
-    hip_tutorials::check_hip(hipGetDeviceProperties(&props, device));
+    cudaDeviceProp props;
+    cuda_tutorials::check_cuda(cudaGetDeviceProperties(&props, device));
 
     std::cout << "--- GPU DEVICE INFO ---" << std::endl;
     std::cout << "Device Name: " << props.name << std::endl;
+#if defined(GPU_BACKEND_HIP) || defined(__HIP_PLATFORM_AMD__) || defined(HIP)
     std::cout << "Architecture (gcnArchName): " << props.gcnArchName << std::endl;
+#else
+    std::cout << "Compute Capability: " << props.major << "." << props.minor << std::endl;
+#endif
     std::cout << "-----------------------" << std::endl;
+
     std::vector<float> a(n), b(n), c(n);
-    randomize_vectors(a,0.0f,1.0f,12345);
-    randomize_vectors(b,0.0f,1.0f,54321);
+    randomize_vectors(a, 0.0f, 1.0f, 12345);
+    randomize_vectors(b, 0.0f, 1.0f, 54321);
+
     float *d_a, *d_b, *d_c;
-    hip_tutorials::check_hip(hipMalloc(&d_a, bytes));
-    hip_tutorials::check_hip(hipMalloc(&d_b, bytes));
-    hip_tutorials::check_hip(hipMalloc(&d_c, bytes));
+    cuda_tutorials::check_cuda(cudaMalloc(&d_a, bytes));
+    cuda_tutorials::check_cuda(cudaMalloc(&d_b, bytes));
+    cuda_tutorials::check_cuda(cudaMalloc(&d_c, bytes));
 
-    hip_tutorials::check_hip(hipMemcpy(d_a, a.data(), bytes, hipMemcpyHostToDevice));
-    hip_tutorials::check_hip(hipMemcpy(d_b, b.data(), bytes, hipMemcpyHostToDevice));
-    hip_tutorials::check_hip(hipMemcpy(d_c, c.data(), bytes, hipMemcpyHostToDevice));
+    cuda_tutorials::check_cuda(cudaMemcpy(d_a, a.data(), bytes, cudaMemcpyHostToDevice));
+    cuda_tutorials::check_cuda(cudaMemcpy(d_b, b.data(), bytes, cudaMemcpyHostToDevice));
+    cuda_tutorials::check_cuda(cudaMemcpy(d_c, c.data(), bytes, cudaMemcpyHostToDevice));
 
-    // Call the wrapper function instead of the kernel directly
-    hip_tutorials::launch_vector_add(d_a, d_b, d_c, n);
-    if (const auto err = hipGetLastError(); err != hipSuccess) {
-        std::cerr << "Launch Error: " << hipGetErrorString(err) << std::endl;
+    // Call the wrapper function
+    cuda_tutorials::launch_vector_add(d_a, d_b, d_c, n);
+    if (const auto err = cudaGetLastError(); err != cudaSuccess) {
+        std::cerr << "Launch Error: " << cudaGetErrorString(err) << std::endl;
     }
-    hip_tutorials::check_hip(hipDeviceSynchronize());
-    hip_tutorials::check_hip(hipMemcpy(c.data(), d_c, bytes, hipMemcpyDeviceToHost));
+
+    cuda_tutorials::check_cuda(cudaDeviceSynchronize());
+    cuda_tutorials::check_cuda(cudaMemcpy(c.data(), d_c, bytes, cudaMemcpyDeviceToHost));
+
     std::cout << "Kernel launched from .cpp file!" << std::endl;
-    std::cout << "Value c[10] = " << c[10] <<" = " << a[10] << " + " << b[10] << std::endl;
+    std::cout << "Value c[10] = " << c[10] << " = " << a[10] << " + " << b[10] << std::endl;
     std::cin.get();
-    hip_tutorials::check_hip(hipFree(d_a));
-    hip_tutorials::check_hip(hipFree(d_b));
-    hip_tutorials::check_hip(hipFree(d_c));
+
+    cuda_tutorials::check_cuda(cudaFree(d_a));
+    cuda_tutorials::check_cuda(cudaFree(d_b));
+    cuda_tutorials::check_cuda(cudaFree(d_c));
+
     return 0;
 }
